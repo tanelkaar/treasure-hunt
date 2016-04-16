@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/games/{gameId}")
+@RequestMapping("/api/games/{gameId}")
 public class TreasureHuntDashboardController {
 
   @Resource

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/games/{gameId}/teams")
+@RequestMapping("/api/games/{gameId}/teams")
 public class TreasureHuntTeamController {
 
   @Resource
