@@ -1,0 +1,41 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.3.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'war'
+
+jar {
+    baseName = 'treasure-hunt'
+    version =  '0.0.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web:1.3.3.RELEASE")
+    compile('org.hsqldb:hsqldb:2.3.3')
+    compile('org.springframework:spring-jdbc:4.2.5.RELEASE')
+    providedCompile("javax.servlet:servlet-api:2.5")
+    testCompile("junit:junit")
+}
+war {
+
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
