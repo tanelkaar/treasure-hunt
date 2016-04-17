@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="treasure-hunt">
+<head>
+    <meta charset="utf-8">
+
+    <!-- Mobile-first -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous"></script>
+
+    <!-- Angular JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+
+    <title>Aarde mäng</title>
+
+</head>
+
+<body style="margin: 20px">
+
+<div>
+    <h1 class="text-center text-info">Mängu alustamiseks sisesta meeskond</h1>
+</div>
+
+<div style="margin-top:100px" ng-controller="register-team" ng-submit="submitRegistration()">
+    <form name="team-registration-form" method="">
+        <select class="form-control" id="game-select" disabled required>
+            <option value="1">Aardemäng TÜK's</option>
+        </select><br>
+        <input type="text" class="form-control" name="team-title" placeholder="meeskonna nimetus..."
+               ng-model="team" required><br>
+        <input type="submit" class="btn btn-warning btn-lg center-block" name="register-team"
+               value="Siseneda">
+    </form>
+
+    <div class="alert alert-danger" style="margin-top: 10px" ng-show="error">
+        <p>{{error}}</p>
+    </div>
+</div>
+
+<script type="text/javascript" charset="UTF-8">
+
+    var app = angular.module("treasure-hunt", []);
+    var gameId = document.getElementById("game-select").options[document.getElementById("game-select").selectedIndex].value;
+    var url = "/api/games/" + gameId + "/teams";
+
+    app.controller("register-team", function ($scope, $http, $window) {
+        $scope.submitRegistration = function () {
+            var title = $scope.team;
+            var json = JSON.stringify({name: title});
+
+            $http.post(url, json).success(function (data) {
+                $window.location.href = "/assignment.html?gameId=" + gameId + "&teamId=" + data.id + "&teamTitle=" + title;
+            }).error(function (data, status) {
+                $scope.error = status + ": Request failed";
+            });
+        };
+    });
+</script>
+
+</body>
+</html>
