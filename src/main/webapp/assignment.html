@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="treasure-hunt">
+  <head>
+    <meta charset="utf-8">
+
+    <!-- Mobile-first -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <!-- Angular JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+
+		<title>Aarde mäng: ülesanne</title>
+
+  </head>
+
+  <body style="margin: 20px">
+
+  <div class="progress" ng-controller="get-progress">
+    <div id="progress" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{completed}}" aria-valuemin="0" aria-valuemax="{{total}}" style="width:50%">
+      on läbitud 4/8
+    </div>
+  </div>
+
+  <div id="team">
+  	<h3 class="text-right text-info">meeskonna nimetus</h3>
+  </div>
+
+  <div class="panel panel-default">
+    <div id="assignment-text" class="panel-body"></div>
+  </div>
+
+  <div id="solution-submit" ng-controller="submit-solution" ng-submit="submitSolution()">
+  	<form action="" id="solution-submit-form" name="solution-submit-form" method="">
+  		<input type="text" class="form-control" ng-model="solution" ng-required="true" placeholder="lahendus..." id="solution" name="solution"><br>
+  		<input type="submit" class="btn btn-success btn-lg center-block" id="submit-solution" name="submit-solution" value="Esita">
+  	</form>
+  </div>
+
+  <div class="alert alert-danger" style="margin-top: 10px">
+    <p>Error message</p>
+  </div>
+
+  <div class="alert alert-success" style="margin-top: 10px">
+    <p>Success message</p>
+  </div>
+
+  <div id="next-assignment" ng-controller="get-new-assignment" ng-submit="getNewAssignment()">
+    <form action="" id="next-assignment-form" name="next-assignment-form" method="">
+      <input type="submit" class="btn btn-primary btn-lg center-block" id="get-next-assigment" name="get-next-assigment" value="Järgmine ülesanne">
+    </form>
+  </div>
+
+  <script charset="UTF-8">
+    var app=angular.module("treasure-hunt", []);
+    var game=1;
+    var team=456; //TODO: get the team id from the session
+    var url="http://localhost:8080/games/" + game + "/teams/" + team;
+
+    app.controller("submit-solution", function($scope, $http) {
+      solution=$scope.solution;
+
+      $scope.submitSolution=function() {
+        var json=JSON.stringify({solution:solution});
+
+        $http({
+              url: url,
+              dataType: 'json',
+              method: 'POST',
+              data: json,
+              headers: {'Content-Type': 'application/json'}
+              }).success(function(data, status, headers, config) {
+          //TODO: return the response message
+          console.log(data);
+        }).error(function(data, status, headers, config) {
+          $scope.error=status + ": " + data;
+          $scope.data=data;
+        });
+      };
+    });
+
+    app.controller("get-new-assignment", function($scope, $http, $location) {
+      $scope.getNewAssignment=function() {
+        $http({
+              url: url,
+              method: 'GET',
+              headers: {'Content-Type': 'application/json'}
+              }).success(function(data, status, headers, config) {
+                console.log(data.currentassignment);
+        }).error(function(data, status, headers, config) {
+          document.getElementById("assignment-text").innerHTML = data.currentassignment.text;
+        });
+      };
+
+      app.controller("get-progress", function($scope, $http) {
+        $http({
+              url: url,
+              method: 'GET',
+              headers: {'Content-Type': 'application/json'}
+              }).success(function(data, status, headers, config) {
+                $scope.total=data.challengesTotal;
+                $scope.completed=data.challengesCompleted;
+              }).error(function(data, status, headers, config) {
+
+              });
+        });
+    });
+
+  </script>
+
+  </body>
+</html>
