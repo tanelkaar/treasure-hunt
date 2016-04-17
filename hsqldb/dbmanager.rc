@@ -1,0 +1,4 @@
+urlid data
+url jdbc:hsqldb:file:hsqldb/data
+username SA
+password

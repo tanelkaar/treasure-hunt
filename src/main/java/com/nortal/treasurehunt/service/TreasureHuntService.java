@@ -4,7 +4,7 @@ import com.nortal.treasurehunt.model.rest.SubmitSolution;
 import com.nortal.treasurehunt.model.rest.Team;
 import com.nortal.treasurehunt.model.rest.TeamCurrentState;
 import com.nortal.treasurehunt.model.rest.TeamRegistration;
-import java.util.List;
+import java.util.Collection;
 
 public interface TreasureHuntService {
 
@@ -21,7 +21,7 @@ public interface TreasureHuntService {
   /**
    * Request new assignment
    */
-  public TeamCurrentState getNewAssignment(Long gameId, Long teamId);
+  public TeamCurrentState assignNewAssignment(Long gameId, Long teamId);
 
   /**
    * Submit solution for current assignment
@@ -31,5 +31,5 @@ public interface TreasureHuntService {
   /**
    * Get game data to display on dashboard
    */
-  public List<Team> getGameData(Long gameId);
+  public Collection<Team> getGameData(Long gameId);
 }

@@ -6,7 +6,7 @@ import java.util.List;
 public class Team {
 
   private String name;
-  private Long challengesCompleted;
+  private Long challengesCompleted = 0L;
   private List<TeamAssignment> assignments;
   public String getName() {
     return name;
@@ -28,10 +28,13 @@ public class Team {
       assignments = new ArrayList<TeamAssignment>();
     }
     assignments.add(assignment);
+    if(assignment.getEndTime() != null && challengesCompleted != null) {
+      challengesCompleted++;
+    }
     return this;
   }
   public void setAssignments(List<TeamAssignment> assignments) {
     this.assignments = assignments;
   }
-  
+
 }

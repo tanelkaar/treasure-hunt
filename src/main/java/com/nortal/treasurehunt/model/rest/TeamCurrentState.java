@@ -15,8 +15,7 @@ public class TeamCurrentState implements Serializable {
   private Long challengesTotal;
   private Boolean gameEnded;
   private Messages messages;
-  
-  
+
   public Messages addSuccess(String message) {
     createMessagesIfNeeded();
     messages.addSuccess(message);
@@ -28,16 +27,15 @@ public class TeamCurrentState implements Serializable {
     messages.addWarning(message);
     return messages;
   }
-  
+
   public Messages addError(String message) {
     createMessagesIfNeeded();
     messages.addError(message);
     return messages;
   }
-  
 
   private void createMessagesIfNeeded() {
-    if(messages == null) {
+    if (messages == null) {
       messages = new Messages();
     }
   }
@@ -64,6 +62,7 @@ public class TeamCurrentState implements Serializable {
 
   public void setChallengesCompleted(Long challengescompleted) {
     this.challengesCompleted = challengescompleted;
+    fillGameEnded();
   }
 
   public Long getChallengesTotal() {
@@ -72,8 +71,14 @@ public class TeamCurrentState implements Serializable {
 
   public void setChallengesTotal(Long challengestotal) {
     this.challengesTotal = challengestotal;
+    fillGameEnded();
   }
 
+  private void fillGameEnded() {
+    if(challengesCompleted != null && challengesCompleted != null) {
+      gameEnded = challengesTotal.compareTo(challengesCompleted) == 0;
+    }
+  }
   public Boolean getGameEnded() {
     return gameEnded;
   }
@@ -93,5 +98,63 @@ public class TeamCurrentState implements Serializable {
   public void setLinks(List<Link> links) {
     this.links = links;
   }
-  
+
+  public static class Builder {
+    private Long id;
+    private List<Link> links;
+    private Currentassignment currentassignment;
+    private Long challengesCompleted;
+    private Long challengesTotal;
+    private Boolean gameEnded;
+    private Messages messages;
+
+    public Builder id(Long id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder links(List<Link> links) {
+      this.links = links;
+      return this;
+    }
+
+    public Builder currentassignment(Currentassignment currentassignment) {
+      this.currentassignment = currentassignment;
+      return this;
+    }
+
+    public Builder challengesCompleted(Long challengesCompleted) {
+      this.challengesCompleted = challengesCompleted;
+      return this;
+    }
+
+    public Builder challengesTotal(Long challengesTotal) {
+      this.challengesTotal = challengesTotal;
+      return this;
+    }
+
+    public Builder gameEnded(Boolean gameEnded) {
+      this.gameEnded = gameEnded;
+      return this;
+    }
+
+    public Builder messages(Messages messages) {
+      this.messages = messages;
+      return this;
+    }
+
+    public TeamCurrentState build() {
+      return new TeamCurrentState(this);
+    }
+  }
+
+  private TeamCurrentState(Builder builder) {
+    this.id = builder.id;
+    this.links = builder.links;
+    this.currentassignment = builder.currentassignment;
+    this.challengesCompleted = builder.challengesCompleted;
+    this.challengesTotal = builder.challengesTotal;
+    this.gameEnded = builder.gameEnded;
+    this.messages = builder.messages;
+  }
 }

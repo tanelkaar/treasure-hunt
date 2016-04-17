@@ -39,7 +39,7 @@ public class TreasureHuntTeamController {
                                           @PathVariable Long teamId,
                                           @RequestParam(name = "getNewAssignment", required=false) String getNewAssignment,
                                           HttpServletRequest request) {
-    TeamCurrentState teamCurrentState = getNewAssignment != null ? treasureHuntService.getNewAssignment(gameId, teamId)
+    TeamCurrentState teamCurrentState = getNewAssignment != null ? treasureHuntService.assignNewAssignment(gameId, teamId)
                                                                 : treasureHuntService.getCurrentState(gameId, teamId);
     if (teamCurrentState.getId() != null) {
       fillLink(teamCurrentState, request.getRequestURL().toString());

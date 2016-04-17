@@ -35,6 +35,9 @@ public class TeamAssignment implements Serializable {
   public void setStartTime(Date startTime) {
     this.startTime = startTime;
     fillCompletedIn();
+    if(startTime != null && status == null) {
+      status = AssignmentStatus.CURRENT;
+    }
   }
 
   public Date getEndTime() {
@@ -44,16 +47,18 @@ public class TeamAssignment implements Serializable {
   public void setEndTime(Date endTime) {
     this.endTime = endTime;
     fillCompletedIn();
+    if(endTime != null) {
+      status = AssignmentStatus.COMPLETED;
+    }
   }
 
   private void fillCompletedIn() {
     if(startTime != null && endTime != null) {
       Long diff = (endTime.getTime() - startTime.getTime()) / 1000;
-      completedIn = ((int)(diff / 60)) + "m " + (diff % 60) + "s"; 
+      completedIn = ((int)(diff / 60)) + "m " + (diff % 60) + "s";
     }
-
   }
-  
+
   public String getCompletedIn() {
     return completedIn;
   }

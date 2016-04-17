@@ -1,85 +1,145 @@
 package com.nortal.treasurehunt.service.impl;
 
-import com.nortal.treasurehunt.model.rest.Currentassignment;
+import com.nortal.treasurehunt.dao.TreasureHuntDAO;
+import com.nortal.treasurehunt.exception.InputParameterValidationException;
+import com.nortal.treasurehunt.model.Assignment;
+import com.nortal.treasurehunt.model.rest.Messages;
 import com.nortal.treasurehunt.model.rest.SubmitSolution;
 import com.nortal.treasurehunt.model.rest.Team;
-import com.nortal.treasurehunt.model.rest.TeamAssignment;
-import com.nortal.treasurehunt.model.rest.TeamAssignment.AssignmentStatus;
 import com.nortal.treasurehunt.model.rest.TeamCurrentState;
 import com.nortal.treasurehunt.model.rest.TeamRegistration;
 import com.nortal.treasurehunt.service.TreasureHuntService;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
 import java.util.List;
+import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class TreasureHuntServiceImpl implements TreasureHuntService {
 
+  @Resource
+  private TreasureHuntDAO treasureHuntDAO;
+
   @Override
-  public TeamCurrentState registerTeam(Long gameId, TeamRegistration teamRegistration) {
-    TeamCurrentState currentState = fillDummyState(null);
-    currentState.addSuccess("Team " + teamRegistration.getName() + " added, have fun!");
-    return currentState;
+  public TeamCurrentState registerTeam(Long gameId,
+      TeamRegistration teamRegistration) {
+    try {
+      checkGame(gameId);
+    } catch (InputParameterValidationException e) {
+      return e.getTeamCurrentState();
+    }
+
+    if (teamRegistration == null
+        || StringUtils.isEmpty(teamRegistration.getName())) {
+      return new TeamCurrentState.Builder().messages(
+          new Messages().addError("Missing team name!")).build();
+    }
+    Long teamId = treasureHuntDAO.getTeamId(gameId, teamRegistration.getName());
+    if (teamId == null) {
+      teamId = treasureHuntDAO.createTeam(teamRegistration.getName(), gameId);
+    }
+    return getTeamCurrentState(teamId);
   }
 
-  protected TeamCurrentState fillDummyState(Long teamId) {
-    TeamCurrentState currentState = new TeamCurrentState();
-    currentState.setId(teamId == null ? 456L : teamId);
-    currentState.setChallengesCompleted(2L);
-    currentState.setChallengesTotal(8L);
-    currentState.setCurrentassignment(new Currentassignment("Riddle number four\n how much do you weigh?"));
-    currentState.setGameEnded(false);
-    return currentState;
+  private void checkGame(Long gameId) throws InputParameterValidationException {
+    if (!treasureHuntDAO.gameExists(gameId)) {
+      throw new InputParameterValidationException(new TeamCurrentState.Builder().messages(
+          new Messages().addError("Invalid game identifier!")).build());
+    }
+  }
+  private TeamCurrentState getTeamCurrentState(Long teamId) {
+    return treasureHuntDAO.getTeamCurrentState(teamId);
   }
 
   @Override
   public TeamCurrentState getCurrentState(Long gameId, Long teamId) {
-    return fillDummyState(teamId);
-  }
-
-  @Override
-  public TeamCurrentState getNewAssignment(Long gameId, Long teamId) {
-    TeamCurrentState currentState = fillDummyState(teamId);
-    currentState.setCurrentassignment(null);
-    currentState.addWarning("No assignment available!\nGo and have a coffe meanwhile.");
-    return currentState;
-  }
-
-  @Override
-  public TeamCurrentState submitSolution(Long gameId, Long teamId, SubmitSolution submitSolution) {
-    TeamCurrentState currentState = fillDummyState(teamId);
-    currentState.addError("Incorrect answer: " + submitSolution.getSolution());
-    return currentState;
-  }
-
-  @Override
-  public List<Team> getGameData(Long gameId) {
-    List<Team> teams = new ArrayList<Team>();
-    for(int i = 0; i < 6; i++) {
-      Team team = new Team();
-      team.setName("Team nr " + (i + 1));
-      long completed = 0;
-      for(int j = 0; j < 8; j++) {
-        TeamAssignment assignment = new TeamAssignment();
-        if(i == j) {
-          assignment.setStatus(AssignmentStatus.CURRENT);
-          assignment.setStartTime(new Date(System.currentTimeMillis() - 30000));
-          assignment.setTries(Long.valueOf((i + j) % 3));
-        }
-        else if((i + j) % 3 == 0) {
-          assignment.setStatus(AssignmentStatus.COMPLETED);
-          assignment.setStartTime(new Date(System.currentTimeMillis() - 600000));
-          assignment.setEndTime(new Date(System.currentTimeMillis() - 400000));
-          assignment.setTries(Long.valueOf((i + j) % 3) + 1);
-          completed++;
-        }
-        team.addAssignment(assignment);
-      }
-      team.setChallengesCompleted(completed);
-      teams.add(team);
+    try {
+      checkGame(gameId);
+      checkTeam(gameId, teamId);
+    } catch (InputParameterValidationException e) {
+      return e.getTeamCurrentState();
     }
-    return teams;
+    return getTeamCurrentState(teamId);
+  }
+
+  private void checkTeam(Long gameId, Long teamId) throws InputParameterValidationException {
+    if (!treasureHuntDAO.teamExists(gameId, teamId)) {
+      throw new InputParameterValidationException(new TeamCurrentState.Builder().messages(
+          new Messages().addError("Invalid team identifier!")).build());
+    }
+  }
+
+  @Override
+  public TeamCurrentState assignNewAssignment(Long gameId, Long teamId) {
+    try {
+      checkGame(gameId);
+      checkTeam(gameId, teamId);
+    } catch (InputParameterValidationException e) {
+      return e.getTeamCurrentState();
+    }
+
+    if(treasureHuntDAO.hasCurrentAssignment(teamId)) {
+      TeamCurrentState currentState = getTeamCurrentState(teamId);
+      currentState.addError("Existing assignment in progress!");
+      return currentState;
+    }
+
+    List<Long> freeAssignmentIds = treasureHuntDAO.getAvailableAssignmentIds(gameId, teamId);
+    if(freeAssignmentIds.isEmpty()) {
+      TeamCurrentState currentState = getTeamCurrentState(teamId);
+      currentState.addWarning("No free assignments available at the moment!");
+      return currentState;
+    }
+
+    boolean assigned = treasureHuntDAO.assignChallenge(teamId, freeAssignmentIds.get(0));
+    TeamCurrentState currentState = getTeamCurrentState(teamId);
+    if(!assigned) {
+      currentState.addWarning("No free assignments available at the moment!");
+    }
+    return currentState;
+  }
+
+  @Override
+  public TeamCurrentState submitSolution(Long gameId, Long teamId,
+      SubmitSolution submitSolution) {
+
+    try {
+      checkGame(gameId);
+      checkTeam(gameId, teamId);
+    } catch (InputParameterValidationException e) {
+      return e.getTeamCurrentState();
+    }
+
+    if(!treasureHuntDAO.hasCurrentAssignment(teamId)) {
+      TeamCurrentState currentState = getTeamCurrentState(teamId);
+      currentState.addError("No assignment in progress!");
+      return currentState;
+    }
+
+    if(submitSolution == null || StringUtils.isEmpty(submitSolution.getSolution())) {
+      TeamCurrentState currentState = treasureHuntDAO.getTeamCurrentState(teamId);
+      currentState.addError("No solution provided!");
+      return currentState;
+    }
+
+    Assignment assignment = treasureHuntDAO.getCurrentAssignment(teamId);
+    treasureHuntDAO.increaseAssignmentSubmitCount(assignment.getId());
+
+    if(assignment.getSolution().toUpperCase().equals(submitSolution.getSolution().toUpperCase())) {
+      treasureHuntDAO.finishAssignment(assignment.getId());
+      TeamCurrentState currentState = treasureHuntDAO.getTeamCurrentState(teamId);
+      currentState.addSuccess(assignment.getCorrectText());
+      return currentState;
+    }
+    TeamCurrentState currentState = treasureHuntDAO.getTeamCurrentState(teamId);
+    currentState.addError(assignment.getWrongText());
+    return currentState;
+  }
+
+  @Override
+  public Collection<Team> getGameData(Long gameId) {
+    return treasureHuntDAO.getGameData(gameId);
   }
 
 }
