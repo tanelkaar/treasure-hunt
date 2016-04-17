@@ -31,68 +31,115 @@
 
 <body style="margin: 20px">
 
-<script>function getQueryVariable(variable) {
-    var query = window.location.search.substring(1);
-    var vars = query.split("&");
-    for (var i = 0; i < vars.length; i++) {
-        var pair = vars[i].split("=");
-        if (pair[0] == variable) {
-            return pair[1];
+<script type="text/javascript" charset="UTF-8">
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
         }
-    }
-    return (false);
-}</script>
+        return (false);
+    }</script>
 
-<div class="progress" ng-controller="get-progress">
-    <div id="progress" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="5" aria-valuemin="0"
-         aria-valuemax="10" style="width:50%">
-        on läbitud 4/8
+<div ng-controller="get-assignment">
+    <div class="progress">
+        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{completed}}"
+             aria-valuemin="0"
+             aria-valuemax="{{total}}" style="width:{{100 / (total/completed) | number:0}}%">
+            on läbitud {{completed}}/{{total}}
+        </div>
+    </div>
+
+    <div id="team">
+        <h3 class="text-right text-info">
+            <script type="text/javascript">document.write(getQueryVariable("teamTitle"));</script>
+        </h3>
+    </div>
+
+    <div class="panel panel-default" ng-show="text">
+        <div class="panel-body">{{text}}</div>
+    </div>
+
+    <div ng-controller="submit-solution" ng-submit="submitSolution()">
+        <form name="solution-submit-form" method="">
+            <input type="text" class="form-control" ng-model="solution" ng-required="true" placeholder="lahendus..."
+                   name="solution"><br>
+            <input type="submit" class="btn btn-success btn-lg center-block" name="submit-solution"
+                   value="Esita">
+        </form>
+
+        <div class="alert alert-danger" style="margin-top: 10px" ng-show="messages.error"
+             ng-repeat="e in messages.error">
+            {{e}}
+        </div>
+
+        <div class="alert alert-danger" style="margin-top: 10px" ng-show="fail">
+            {{fail}}
+        </div>
+
+        <div class="alert alert-warning" style="margin-top: 10px" ng-show="messages.warning"
+             ng-repeat="w in messages.warning">
+            {{w}}
+        </div>
+
+        <div class="alert alert-success" style="margin-top: 10px" ng-show="messages.success"
+             ng-repeat="s in messages.success">
+            {{s}}
+        </div>
+
+        <div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-show="!text"
+             style="margin-top:10px">
+            <form name="next-assignment-form" method="">
+                <input type="submit" class="btn btn-primary btn-lg center-block"
+                       name="get-next-assigment" value="Järgmine ülesanne">
+            </form>
+
+            <div class="alert alert-danger" style="margin-top: 10px" ng-show="aError">
+                {{aError}}
+            </div>
+        </div>
+
     </div>
 </div>
 
-<div id="team">
-    <h3 class="text-right text-info">
-        <script type="text/javascript">document.write(getQueryVariable("teamTitle"));</script>
-    </h3>
-</div>
+<script type="text/javascript" charset="UTF-8">
 
-<div class="panel panel-default">
-    <div id="assignment-text" class="panel-body"></div>
-</div>
+    function getParameter(theParameter) {
+        var params = window.location.search.substr(1).split('&');
 
-<div id="solution-submit" ng-controller="submit-solution" ng-submit="submitSolution()">
-    <form action="" id="solution-submit-form" name="solution-submit-form" method="">
-        <input type="text" class="form-control" ng-model="solution" ng-required="true" placeholder="lahendus..."
-               id="solution" name="solution"><br>
-        <input type="submit" class="btn btn-success btn-lg center-block" id="submit-solution" name="submit-solution"
-               value="Esita">
-    </form>
-</div>
-
-<div class="alert alert-danger" style="margin-top: 10px">
-    <p>Error message</p>
-</div>
-
-<div class="alert alert-success" style="margin-top: 10px">
-    <p>Success message</p>
-</div>
-
-<div id="next-assignment" ng-controller="get-new-assignment" ng-submit="getNewAssignment()">
-    <form action="" id="next-assignment-form" name="next-assignment-form" method="">
-        <input type="submit" class="btn btn-primary btn-lg center-block" id="get-next-assigment"
-               name="get-next-assigment" value="Järgmine ülesanne">
-    </form>
-</div>
-
-<script charset="UTF-8">
+        for (var i = 0; i < params.length; i++) {
+            var p = params[i].split('=');
+            if (p[0] == theParameter) {
+                return decodeURIComponent(p[1]);
+            }
+        }
+        return false;
+    }
 
     var app = angular.module("treasure-hunt", []);
-    var gameId = 1;
-    var teamId = 456; //TODO: get the team id from the session
-    var url = "http://localhost:8080/api//games/" + gameId + "/teams/" + teamId;
+    var gameId = getParameter("gameId");
+    var teamId = getParameter(("teamId"));
+    var url = "/api/games/" + gameId + "/teams/" + teamId;
+
+    app.controller("get-assignment", function ($scope, $http) {
+        $http({
+            url: url,
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        }).success(function (data) {
+            $scope.text = data.currentassignment.text;
+            $scope.total = data.challengesTotal;
+            $scope.completed = data.challengesCompleted;
+        }).error(function (data, status) {
+            //TODO
+        });
+    });
 
     app.controller("submit-solution", function ($scope, $http) {
-        solution = $scope.solution;
+        var solution = $scope.solution;
 
         $scope.submitSolution = function () {
             var json = JSON.stringify({solution: solution});
@@ -103,41 +150,26 @@
                 method: 'POST',
                 data: json,
                 headers: {'Content-Type': 'application/json'}
-            }).success(function (data, status, headers, config) {
-                //TODO: return the response message
-                console.log(data);
-            }).error(function (data, status, headers, config) {
-                $scope.error = status + ": " + data;
-                $scope.data = data;
+            }).success(function (data) {
+                $scope.messages = data.messages;
+            }).error(function (data, status) {
+                $scope.fail = status + ": Andmete pärimine ebaõnnestus";
             });
         };
     });
 
-    app.controller("get-new-assignment", function ($scope, $http, $location) {
+    app.controller("get-new-assignment", function ($scope, $http, $window) {
         $scope.getNewAssignment = function () {
             $http({
-                url: url,
+                url: url + "?new-assignment",
                 method: 'GET',
                 headers: {'Content-Type': 'application/json'}
-            }).success(function (data, status, headers, config) {
-                console.log(data.currentassignment);
-            }).error(function (data, status, headers, config) {
-                document.getElementById("assignment-text").innerHTML = data.currentassignment.text;
+            }).success(function (data) {
+                $window.location.reload();
+            }).error(function (data, status) {
+                $scope.aError = status + ": Andmete saatmine ebaõnnestus";
             });
         };
-
-        app.controller("get-progress", function ($scope, $http) {
-            $http({
-                url: url,
-                method: 'GET',
-                headers: {'Content-Type': 'application/json'}
-            }).success(function (data, status, headers, config) {
-                $scope.total = data.challengesTotal;
-                $scope.completed = data.challengesCompleted;
-            }).error(function (data, status, headers, config) {
-
-            });
-        });
     });
 
 </script>

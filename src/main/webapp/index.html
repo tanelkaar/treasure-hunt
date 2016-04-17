@@ -31,42 +31,44 @@
 
 <body style="margin: 20px">
 
-<div id="welcome-text">
-    <h1 class="text-center text-info">Tere tulemast aarde mängu!</h1>
+<div>
+    <h1 class="text-center text-info">Mängu alustamiseks sisesta meeskond</h1>
 </div>
 
-<div id="team-registration" style="margin-top:100px" ng-controller="register-team" ng-submit="submitRegistration()">
-    <form action="" id="team-registration-form" name="team-registration-form" method="">
-        <input type="text" class="form-control" id="team-title" name="team-title" placeholder="meeskonna nimetus..."
+<div style="margin-top:100px" ng-controller="register-team" ng-submit="submitRegistration()">
+    <form name="team-registration-form" method="">
+        <select class="form-control" id="game-select" disabled required>
+            <option value="1">Aardemäng TÜK's</option>
+        </select><br>
+        <input type="text" class="form-control" name="team-title" placeholder="meeskonna nimetus..."
                ng-model="team" required><br>
-        <input type="submit" class="btn btn-warning btn-lg center-block" id="register-team" name="register-team"
-               value="Registreerida">
+        <input type="submit" class="btn btn-warning btn-lg center-block" name="register-team"
+               value="Siseneda">
     </form>
+
+    <div class="alert alert-danger" style="margin-top: 10px" ng-show="error">
+        <p>{{error}}</p>
+    </div>
 </div>
 
-<script charset="UTF-8">
+<script type="text/javascript" charset="UTF-8">
+
     var app = angular.module("treasure-hunt", []);
-    var gameId = 1;
-    var url = "http://localhost:8080/api/games/" + gameId + "/teams";
+    var gameId = document.getElementById("game-select").options[document.getElementById("game-select").selectedIndex].value;
+    var url = "/api/games/" + gameId + "/teams";
 
     app.controller("register-team", function ($scope, $http, $window) {
         $scope.submitRegistration = function () {
-            title = $scope.team;
+            var title = $scope.team;
             var json = JSON.stringify({name: title});
 
             $http.post(url, json).success(function (data) {
                 $window.location.href = "/assignment.html?gameId=" + gameId + "&teamId=" + data.id + "&teamTitle=" + title;
             }).error(function (data, status) {
-                //TODO: show errors
-                $scope.error = status + ": " + data;
-                $scope.data = data;
-                console.log("error: " + data);
+                $scope.error = status + ": Request failed";
             });
         };
     });
-
-    //TODO: show game
-
 </script>
 
 </body>

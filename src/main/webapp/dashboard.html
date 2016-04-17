@@ -31,18 +31,24 @@
 
 <body style="margin: 20px">
 
-<div id="game">
+<div>
     <h2 class="text-info">Aarde mäng: töölaud</h2>
 </div>
 
-<div id="dashboard" ng-controller="result-table">
+<div ng-controller="result-table">
+    <div class="alert alert-danger" style="margin-top: 10px" ng-if="error">
+        <p>{{error}}</p>
+    </div>
+
     <table class="table table-hover">
         <tr ng-repeat="t in teams">
             <th class="active"><p>{{t.name}}</p></th>
             <td ng-repeat="a in t.assignments">
-                <p ng-if="a.status==='CURRENT'" class="alert-info text-center">{{a.status}} <span class="glyphicon glyphicon-star-empty"></span></p>
+                <p ng-if="a.status==='CURRENT'" class="alert-info text-center">{{a.status}} <span
+                        class="glyphicon glyphicon-star-empty"></span></p>
                 <p ng-if="a.status==='WAITING'" class="alert-warning text-center">{{a.status}}</p>
-                <p ng-if="a.status==='COMPLETED'" class="alert-success text-center">{{a.status}}<br><span class="glyphicon glyphicon-hourglass"></span>{{a.completedIn}}</p>
+                <p ng-if="a.status==='COMPLETED'" class="alert-success text-center">{{a.status}}<br><span
+                        class="glyphicon glyphicon-hourglass"></span>{{a.completedIn}}</p>
 
                 <p ng-if="a.startTime"><span class="glyphicon glyphicon-play"></span> {{a.startTime}}</p>
                 <p ng-if="a.endTime"><span class="glyphicon glyphicon-flag"></span> {{a.endTime}}</p>
@@ -52,16 +58,29 @@
     </table>
 </div>
 
-<script charset="UTF-8">
+<script type="text/javascript" charset="UTF-8">
+
+    function getParameter(theParameter) {
+        var params = window.location.search.substr(1).split('&');
+
+        for (var i = 0; i < params.length; i++) {
+            var p = params[i].split('=');
+            if (p[0] == theParameter) {
+                return decodeURIComponent(p[1]);
+            }
+        }
+        return false;
+    }
+
     var app = angular.module("treasure-hunt", []);
-    var gameId = 1;
-    var url = "http://localhost:8080/api/games/" + gameId;
+    var gameId = getParameter("gameId");
+    var url = "/api/games/" + gameId;
 
     app.controller("result-table", function ($scope, $http) {
         $http.get(url).success(function (data) {
             $scope.teams = data;
         }).error(function (data, status) {
-            $scope.error = status + ": request failed";
+            $scope.error = status + ": Request failed, see logs for details";
         });
     });
 </script>
