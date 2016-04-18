@@ -41,11 +41,11 @@
                 return pair[1];
             }
         }
-        return (false);
+        return('');
     }</script>
 
 <div ng-controller="get-assignment">
-    <div class="progress">
+    <div class="progress" ng-if="completed">
         <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{completed}}"
              aria-valuemin="0"
              aria-valuemax="{{total}}" style="width:{{100 / (total/completed) | number:0}}%">
@@ -55,16 +55,16 @@
 
     <div id="team">
         <h3 class="text-right text-info">
-            <script type="text/javascript">document.write(getQueryVariable("teamTitle"));</script>
+            <script type="text/javascript">document.write(getQueryVariable("teamTitle"))</script>
         </h3>
     </div>
 
-    <div class="panel panel-default" ng-show="text">
+    <div class="panel panel-default" ng-if="text">
         <div class="panel-body">{{text}}</div>
     </div>
 
     <div ng-controller="submit-solution" ng-submit="submitSolution()">
-        <form name="solution-submit-form" method="">
+        <form name="solution-submit-form" method="" ng-if="text">
             <input type="text" class="form-control" ng-model="solution" ng-required="true" placeholder="lahendus..."
                    name="solution"><br>
             <input type="submit" class="btn btn-success btn-lg center-block" name="submit-solution"
@@ -76,8 +76,8 @@
             {{e}}
         </div>
 
-        <div class="alert alert-danger" style="margin-top: 10px" ng-show="fail">
-            {{fail}}
+        <div class="alert alert-danger" style="margin-top: 10px" ng-show="err">
+            {{err}}
         </div>
 
         <div class="alert alert-warning" style="margin-top: 10px" ng-show="messages.warning"
@@ -90,11 +90,11 @@
             {{s}}
         </div>
 
-        <div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-show="!text"
+        <div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-if="!text"
              style="margin-top:10px">
             <form name="next-assignment-form" method="">
                 <input type="submit" class="btn btn-primary btn-lg center-block"
-                       name="get-next-assigment" value="Järgmine ülesanne">
+                       name="get-next-assigment" value="Saada uut ülesannet">
             </form>
 
             <div class="alert alert-danger" style="margin-top: 10px" ng-show="aError">
@@ -134,7 +134,7 @@
             $scope.total = data.challengesTotal;
             $scope.completed = data.challengesCompleted;
         }).error(function (data, status) {
-            //TODO
+            $scope.err=status + ": Andmete pärimine ebaõnnestus";
         });
     });
 
@@ -153,7 +153,7 @@
             }).success(function (data) {
                 $scope.messages = data.messages;
             }).error(function (data, status) {
-                $scope.fail = status + ": Andmete pärimine ebaõnnestus";
+
             });
         };
     });
