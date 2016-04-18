@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="treasure-hunt">
+<html lang="en">
 <head>
+
     <meta charset="utf-8">
 
     <!-- Mobile-first -->
@@ -29,7 +30,7 @@
 
 </head>
 
-<body style="margin: 20px">
+<body style="margin: 20px" ng-app="treasure-hunt">
 
 <script type="text/javascript" charset="UTF-8">
     function getQueryVariable(variable) {
@@ -41,8 +42,9 @@
                 return pair[1];
             }
         }
-        return('');
-    }</script>
+        return("");
+    }
+</script>
 
 <div ng-controller="get-assignment">
     <div class="progress" ng-if="completed">
@@ -53,7 +55,7 @@
         </div>
     </div>
 
-    <div id="team">
+    <div>
         <h3 class="text-right text-info">
             <script type="text/javascript">document.write(getQueryVariable("teamTitle"))</script>
         </h3>

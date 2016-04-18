@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="treasure-hunt">
+<html lang="en">
 <head>
+
     <meta charset="utf-8">
 
     <!-- Mobile-first -->
@@ -29,7 +30,7 @@
 
 </head>
 
-<body style="margin: 20px">
+<body style="margin: 20px" ng-app="treasure-hunt">
 
 <div>
     <h1 class="text-center text-info">Mängu alustamiseks sisesta meeskond</h1>
@@ -37,6 +38,7 @@
 
 <div style="margin-top:100px" ng-controller="register-team" ng-submit="submitRegistration()">
     <form name="team-registration-form" method="">
+        <!-- TODO: take active games from the DB -->
         <select class="form-control" id="game-select" disabled required>
             <option value="1">Aardemäng TÜK's</option>
         </select><br>
@@ -69,6 +71,7 @@
             });
         };
     });
+
 </script>
 
 </body>
