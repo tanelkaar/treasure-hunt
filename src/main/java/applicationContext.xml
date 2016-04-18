@@ -26,10 +26,20 @@
     <property name="dataSource" ref="dataSource"/>
   </bean>
 
-  <bean class="org.apache.commons.dbcp2.BasicDataSource" id="dataSource">
+  <bean id="database" class="com.nortal.treasurehunt.hsqldb.HyperSqlDbServer">
+    <constructor-arg>
+      <props>
+        <prop key="server.database.0">hsqldb/data</prop>
+        <prop key="server.dbname.0">data</prop>
+        <prop key="server.remote_open">true</prop>
+        <prop key="hsqldb.reconfig_logging">false</prop>
+      </props>
+    </constructor-arg>
+  </bean>
+  
+  <bean class="org.apache.commons.dbcp2.BasicDataSource" id="dataSource" depends-on="database">
     <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-    <!-- property name="url" value="jdbc:hsqldb:file:#{systemProperties['user.home']}/db/data"/ -->
-    <property name="url" value="jdbc:hsqldb:file:hsqldb/data" />
+    <property name="url" value="jdbc:hsqldb:hsql://localhost/data" />
     <property name="username" value="sa" />
     <property name="password" value="" />
   </bean>
