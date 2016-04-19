@@ -66,12 +66,12 @@
     </div>
 </div>
 
-<div ng-controller="submit-solution" ng-submit="submitSolution()" ng-show="text">
-    <form name="solution-submit-form" method="">
+<div ng-controller="submit-solution" ng-show="text">
+    <form name="solution-submit-form" method="" ng-submit="submitSolution()">
         <input type="text" class="form-control" name="solution-text" placeholder="lahendus..." ng-model="solution"
                required><br>
         <input type="submit" class="btn btn-success btn-lg center-block" name="submit-solution"
-               value="Esita">
+               value="Esita" ng-show="!sMessages.success">
     </form>
 
     <div class="alert alert-danger" style="margin-top: 10px" ng-if="sError">
@@ -92,6 +92,33 @@
          ng-repeat="ss in sMessages.success">
         {{ss}}
     </div>
+
+    <div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-if="sMessages.success"
+          style="margin-top:10px">
+        <form name="next-assignment-form" method="">
+            <input type="submit" class="btn btn-primary btn-lg center-block"
+                   name="get-next-assigment" value="Anna uus ülesanne">
+        </form>
+
+        <div class="alert alert-danger" style="margin-top: 10px" ng-show="aError">
+            error {{aError}}
+        </div>
+
+        <div class="alert alert-danger" style="margin-top: 10px" ng-if="aMessages.error"
+             ng-repeat="ae in aMessages.error">
+            {{ae}}
+        </div>
+
+        <div class="alert alert-warning" style="margin-top: 10px" ng-if="aMessages.warning"
+             ng-repeat="aw in aMessages.warning">
+            {{aw}}
+        </div>
+
+        <div class="alert alert-success" style="margin-top: 10px" ng-if="aMessages.success"
+             ng-repeat="as in aMessages.success">
+            {{as}}
+        </div>
+    </div>
 </div>
 
 <div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-show="!text"
@@ -101,7 +128,7 @@
                name="get-next-assigment" value="Anna uus ülesanne">
     </form>
 
-    <div class="alert alert-danger" style="margin-top: 10px" ng-show="aError">
+    <div class="alert alert-danger" style="margin-top: 10px" ng-if="aError">
         {{aError}}
     </div>
 
@@ -167,9 +194,9 @@
 
             $http.post(url, json).success(function (data) {
                 $scope.sMessages = data.messages;
-                if (data.messages.success) {
-                    $window.location.reload();
-                }
+                //if (data.messages.success) {
+                //   $window.location.reload();
+                //}
             }).error(function (data, status) {
                 $scope.sError=status + ": Andmete saatmine ebaõnnestus";
             });
