@@ -26,7 +26,7 @@
     <!-- Angular JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
 
-    <title>Aarde mäng: ülesanne</title>
+    <title>Aardemäng: ülesanne</title>
 
 </head>
 
@@ -51,7 +51,7 @@
         <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{completed}}"
              aria-valuemin="0"
              aria-valuemax="{{total}}" style="width:{{100 / (total/completed) | number:0}}%">
-            on läbitud {{completed}}/{{total}}
+            Läbitud {{completed}}/{{total}}
         </div>
     </div>
 
@@ -98,7 +98,7 @@
       style="margin-top:10px">
     <form name="next-assignment-form" method="">
         <input type="submit" class="btn btn-primary btn-lg center-block"
-               name="get-next-assigment" value="Saada uut ülesannet">
+               name="get-next-assigment" value="Anna uus ülesanne">
     </form>
 
     <div class="alert alert-danger" style="margin-top: 10px" ng-show="aError">
