@@ -1,4 +1,4 @@
 urlid data
-url jdbc:hsqldb:file:hsqldb/data
+url jdbc:hsqldb:hsql://localhost:22454/data
 username SA
 password

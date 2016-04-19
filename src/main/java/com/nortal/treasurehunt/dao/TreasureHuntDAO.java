@@ -71,7 +71,7 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
     String sql =
         "SELECT t.id, c.TEXT AS current_assignment_text, "
             + "(SELECT count(*) FROM ASSIGNMENT am WHERE am.TEAM_ID = t.id AND am.END_TIME IS NOT null) AS challenges_completed, "
-            + "(SELECT count(*) FROM assignment) AS challenges_total "
+            + "(SELECT count(*) FROM challenge ch WHERE ch.game_id = t.game_id) AS challenges_total "
             + "FROM team t "
             + "LEFT OUTER JOIN ASSIGNMENT a ON a.TEAM_ID = t.id AND a.END_TIME IS NULL "
             + "LEFT OUTER JOIN challenge c ON c.ID = a.CHALLENGE_ID "
@@ -95,16 +95,9 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
   }
 
   public boolean hasCurrentAssignment(Long teamId) {
-    String sql = "SELECT 1 FROM assignment WHERE team_id = ? AND end_time is null";
-    try {
-      return getJdbcTemplate().queryForObject(sql, Long.class, teamId) != null;
-    } catch (IncorrectResultSizeDataAccessException e) {
-      if (e.getActualSize() == 0) {
-        return false;
-      }
-      throw e;
-    }
-  }
+    String sql = "SELECT count(*) FROM assignment WHERE team_id = ? AND end_time is null";
+      return getJdbcTemplate().queryForObject(sql, Long.class, teamId) > 0;
+   }
 
   public List<Long> getAvailableAssignmentIds(Long gameId, Long teamId) {
     String sql =
