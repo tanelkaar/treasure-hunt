@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="et">
 <head>
 
     <meta charset="utf-8">
@@ -61,11 +61,11 @@
 
     app.controller("register-team", function ($scope, $http, $window) {
         $scope.submitRegistration = function () {
-            var title = $scope.team;
-            var json = JSON.stringify({name: title});
+            var teamTitle = $scope.team;
+            var json = JSON.stringify({name: teamTitle});
 
             $http.post(url, json).success(function (data) {
-                $window.location.href = "/assignment.html?gameId=" + gameId + "&teamId=" + data.id + "&teamTitle=" + title;
+                $window.location.href = "/assignment.html?gameId=" + gameId + "&teamId=" + data.id + "&teamTitle=" + teamTitle;
             }).error(function (data, status) {
                 $scope.error = status + ": Andmete saatmine ebaõnnestus";
             });

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="et">
 <head>
 
     <meta charset="utf-8">
@@ -46,7 +46,7 @@
     }
 </script>
 
-<div ng-controller="get-assignment">
+<div ng-controller="assignment">
     <div class="progress" ng-if="completed">
         <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{completed}}"
              aria-valuemin="0"
@@ -64,46 +64,60 @@
     <div class="panel panel-default" ng-if="text">
         <div class="panel-body">{{text}}</div>
     </div>
+</div>
 
-    <div ng-controller="submit-solution" ng-submit="submitSolution()">
-        <form name="solution-submit-form" method="" ng-if="text">
-            <input type="text" class="form-control" ng-model="solution" ng-required="true" placeholder="lahendus..."
-                   name="solution"><br>
-            <input type="submit" class="btn btn-success btn-lg center-block" name="submit-solution"
-                   value="Esita">
-        </form>
+<div ng-controller="submit-solution" ng-submit="submitSolution()" ng-show="text">
+    <form name="solution-submit-form" method="">
+        <input type="text" class="form-control" name="solution-text" placeholder="lahendus..." ng-model="solution"
+               required><br>
+        <input type="submit" class="btn btn-success btn-lg center-block" name="submit-solution"
+               value="Esita">
+    </form>
 
-        <div class="alert alert-danger" style="margin-top: 10px" ng-show="messages.error"
-             ng-repeat="e in messages.error">
-            {{e}}
-        </div>
+    <div class="alert alert-danger" style="margin-top: 10px" ng-if="sError">
+        {{sError}}
+    </div>
 
-        <div class="alert alert-danger" style="margin-top: 10px" ng-show="err">
-            {{err}}
-        </div>
+    <div class="alert alert-danger" style="margin-top: 10px" ng-if="sMessages.error"
+         ng-repeat="se in sMessages.error">
+        {{se}}
+    </div>
 
-        <div class="alert alert-warning" style="margin-top: 10px" ng-show="messages.warning"
-             ng-repeat="w in messages.warning">
-            {{w}}
-        </div>
+    <div class="alert alert-warning" style="margin-top: 10px" ng-if="sMessages.warning"
+         ng-repeat="sw in sMessages.warning">
+        {{sw}}
+    </div>
 
-        <div class="alert alert-success" style="margin-top: 10px" ng-show="messages.success"
-             ng-repeat="s in messages.success">
-            {{s}}
-        </div>
+    <div class="alert alert-success" style="margin-top: 10px" ng-if="sMessages.success"
+         ng-repeat="ss in sMessages.success">
+        {{ss}}
+    </div>
+</div>
 
-        <div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-if="!text"
-             style="margin-top:10px">
-            <form name="next-assignment-form" method="">
-                <input type="submit" class="btn btn-primary btn-lg center-block"
-                       name="get-next-assigment" value="Saada uut ülesannet">
-            </form>
+<div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-show="!text"
+      style="margin-top:10px">
+    <form name="next-assignment-form" method="">
+        <input type="submit" class="btn btn-primary btn-lg center-block"
+               name="get-next-assigment" value="Saada uut ülesannet">
+    </form>
 
-            <div class="alert alert-danger" style="margin-top: 10px" ng-show="aError">
-                {{aError}}
-            </div>
-        </div>
+    <div class="alert alert-danger" style="margin-top: 10px" ng-show="aError">
+        {{aError}}
+    </div>
 
+    <div class="alert alert-danger" style="margin-top: 10px" ng-if="aMessages.error"
+         ng-repeat="ae in aMessages.error">
+        {{ae}}
+    </div>
+
+    <div class="alert alert-warning" style="margin-top: 10px" ng-if="aMessages.warning"
+         ng-repeat="aw in aMessages.warning">
+        {{aw}}
+    </div>
+
+    <div class="alert alert-success" style="margin-top: 10px" ng-if="aMessages.success"
+         ng-repeat="as in aMessages.success">
+        {{as}}
     </div>
 </div>
 
@@ -124,50 +138,63 @@
     var app = angular.module("treasure-hunt", []);
     var gameId = getParameter("gameId");
     var teamId = getParameter(("teamId"));
+    var teamTitle = getParameter(("teamTitle"));
     var url = "/api/games/" + gameId + "/teams/" + teamId;
 
-    app.controller("get-assignment", function ($scope, $http) {
-        $http({
-            url: url,
-            method: 'GET',
-            headers: {'Content-Type': 'application/json'}
-        }).success(function (data) {
-            $scope.text = data.currentassignment.text;
+    app.controller("assignment", function ($scope, $http) {
+        $http.get(url).success(function (data) {
+            if (data.currentassignment) {
+                $scope.text = data.currentassignment.text;
+            }
             $scope.total = data.challengesTotal;
             $scope.completed = data.challengesCompleted;
         }).error(function (data, status) {
-            $scope.err=status + ": Andmete pärimine ebaõnnestus";
+            $scope.aError=status + ": Andmete pärimine ebaõnnestus";
         });
     });
 
-    app.controller("submit-solution", function ($scope, $http) {
-        var solution = $scope.solution;
+    app.controller("submit-solution", function ($scope, $http, $window) {
+
+        $http.get(url).success(function (data) {
+            $scope.text = data.currentassignment;
+        }).error(function (data, status) {
+            $scope.sError=status + ": Andmete pärimine ebaõnnestus";
+        });
 
         $scope.submitSolution = function () {
-            var json = JSON.stringify({solution: solution});
+            var solutionText = $scope.solution;
+            var json = JSON.stringify({solution: solutionText});
 
-            $http({
-                url: url,
-                dataType: 'json',
-                method: 'POST',
-                data: json,
-                headers: {'Content-Type': 'application/json'}
-            }).success(function (data) {
-                $scope.messages = data.messages;
+            $http.post(url, json).success(function (data) {
+                $scope.sMessages = data.messages;
+                if (data.messages.success) {
+                    $window.location.reload();
+                }
             }).error(function (data, status) {
-
+                $scope.sError=status + ": Andmete saatmine ebaõnnestus";
             });
         };
     });
 
     app.controller("get-new-assignment", function ($scope, $http, $window) {
+
+        $http.get(url).success(function (data) {
+            $scope.text = data.currentassignment;
+        }).error(function (data, status) {
+            $scope.sError=status + ": Andmete pärimine ebaõnnestus";
+        });
+
         $scope.getNewAssignment = function () {
             $http({
-                url: url + "?new-assignment",
+                url: url,
+                params: {getNewAssignment: 1},
                 method: 'GET',
                 headers: {'Content-Type': 'application/json'}
             }).success(function (data) {
-                $window.location.reload();
+                $scope.aMessages = data.messages;
+                if (data.currentassignment) {
+                    $window.location.reload();
+                }
             }).error(function (data, status) {
                 $scope.aError = status + ": Andmete saatmine ebaõnnestus";
             });
