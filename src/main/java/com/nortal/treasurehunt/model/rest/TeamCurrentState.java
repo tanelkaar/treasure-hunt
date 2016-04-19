@@ -13,7 +13,7 @@ public class TeamCurrentState implements Serializable {
   private Currentassignment currentassignment;
   private Long challengesCompleted;
   private Long challengesTotal;
-  private Boolean gameEnded;
+  private boolean gameEnded;
   private Messages messages;
 
   public Messages addSuccess(String message) {
@@ -79,11 +79,11 @@ public class TeamCurrentState implements Serializable {
       gameEnded = challengesTotal.compareTo(challengesCompleted) == 0;
     }
   }
-  public Boolean getGameEnded() {
+  public boolean getGameEnded() {
     return gameEnded;
   }
 
-  public void setGameEnded(Boolean gameEnded) {
+  public void setGameEnded(boolean gameEnded) {
     this.gameEnded = gameEnded;
   }
 
@@ -105,7 +105,7 @@ public class TeamCurrentState implements Serializable {
     private Currentassignment currentassignment;
     private Long challengesCompleted;
     private Long challengesTotal;
-    private Boolean gameEnded;
+    private boolean gameEnded;
     private Messages messages;
 
     public Builder id(Long id) {
@@ -133,7 +133,7 @@ public class TeamCurrentState implements Serializable {
       return this;
     }
 
-    public Builder gameEnded(Boolean gameEnded) {
+    public Builder gameEnded(boolean gameEnded) {
       this.gameEnded = gameEnded;
       return this;
     }
@@ -156,5 +156,6 @@ public class TeamCurrentState implements Serializable {
     this.challengesTotal = builder.challengesTotal;
     this.gameEnded = builder.gameEnded;
     this.messages = builder.messages;
+    this.fillGameEnded();
   }
 }

@@ -1,6 +1,7 @@
 package com.nortal.treasurehunt.dao;
 
 import com.nortal.treasurehunt.model.Assignment;
+import com.nortal.treasurehunt.model.Game;
 import com.nortal.treasurehunt.model.rest.Currentassignment;
 import com.nortal.treasurehunt.model.rest.Team;
 import com.nortal.treasurehunt.model.rest.TeamAssignment;
@@ -96,8 +97,8 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
 
   public boolean hasCurrentAssignment(Long teamId) {
     String sql = "SELECT count(*) FROM assignment WHERE team_id = ? AND end_time is null";
-      return getJdbcTemplate().queryForObject(sql, Long.class, teamId) > 0;
-   }
+    return getJdbcTemplate().queryForObject(sql, Long.class, teamId) > 0;
+  }
 
   public List<Long> getAvailableAssignmentIds(Long gameId, Long teamId) {
     String sql =
@@ -121,7 +122,8 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
             + "WHERE t.id = ?"
             // not assigned to someone else meanwhile
             + "AND NOT EXISTS (SELECT 1 FROM assignment a WHERE a.end_time IS NULL AND a.challenge_id = ?)";
-    return getJdbcTemplate().update(sql, teamId, challengeId, teamId, challengeId) == 1;
+    return getJdbcTemplate().update(sql, teamId, challengeId, teamId,
+        challengeId) == 1;
   }
 
   public Assignment getCurrentAssignment(Long teamId) {
@@ -139,10 +141,10 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
       @Override
       public Assignment mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Assignment.Builder()
-          .id(rs.getLong("id"))
-          .solution(rs.getString("solution"))
-          .correctText(rs.getString("correct_text"))
-          .wrongText(rs.getString("wrong_text")).build();
+            .id(rs.getLong("id"))
+            .solution(rs.getString("solution"))
+            .correctText(rs.getString("correct_text"))
+            .wrongText(rs.getString("wrong_text")).build();
       }
 
     }, teamId);
@@ -161,40 +163,57 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
   public Collection<Team> getGameData(Long gameId) {
     String sql =
         "SELECT t.id, t.name, a.START_TIME, a.END_TIME, a.SUBMIT_COUNT "
-        + "FROM team t "
-        + "INNER JOIN challenge c ON t.GAME_ID = c.GAME_ID "
-        + "LEFT OUTER JOIN ASSIGNMENT a ON a.TEAM_ID = t.id AND a.CHALLENGE_ID = c.id  "
-        + "WHERE t.GAME_ID = ? "
-        + "ORDER BY t.id, c.id";
-    return getJdbcTemplate().query(sql, new ResultSetExtractor<Collection<Team>>() {
+            + "FROM team t "
+            + "INNER JOIN challenge c ON t.GAME_ID = c.GAME_ID "
+            + "LEFT OUTER JOIN ASSIGNMENT a ON a.TEAM_ID = t.id AND a.CHALLENGE_ID = c.id  "
+            + "WHERE t.GAME_ID = ? "
+            + "ORDER BY t.id, c.id";
+    return getJdbcTemplate().query(sql,
+        new ResultSetExtractor<Collection<Team>>() {
 
-      @Override
-      public Collection<Team> extractData(ResultSet rs) throws SQLException,
-          DataAccessException {
-        LinkedHashMap<Long, Team> teams = new LinkedHashMap<>();
-        while(rs.next()) {
-          Long teamId = rs.getLong("id");
-          Team team = teams.get(teamId);
-          if(team == null) {
-            team = new Team();
-            team.setName(rs.getString("name"));
-            teams.put(teamId, team);
+          @Override
+          public Collection<Team> extractData(ResultSet rs)
+              throws SQLException,
+              DataAccessException {
+            LinkedHashMap<Long, Team> teams = new LinkedHashMap<>();
+            while (rs.next()) {
+              Long teamId = rs.getLong("id");
+              Team team = teams.get(teamId);
+              if (team == null) {
+                team = new Team();
+                team.setName(rs.getString("name"));
+                teams.put(teamId, team);
+              }
+              TeamAssignment assignment = new TeamAssignment();
+              assignment.setStartTime(rs.getTimestamp("START_TIME"));
+              assignment.setEndTime(rs.getTimestamp("END_TIME"));
+              assignment.setTries(getLong(rs, "SUBMIT_COUNT"));
+              team.addAssignment(assignment);
+            }
+            return teams.values();
           }
-          TeamAssignment assignment = new TeamAssignment();
-          assignment.setStartTime(rs.getTimestamp("START_TIME"));
-          assignment.setEndTime(rs.getTimestamp("END_TIME"));
-          assignment.setTries(getLong(rs, "SUBMIT_COUNT"));
-          team.addAssignment(assignment);
-        }
-        return teams.values();
-      }}, gameId);
+        }, gameId);
   }
 
-  public static Long getLong(ResultSet rs, String columnName) throws SQLException {
+  public static Long getLong(ResultSet rs, String columnName)
+      throws SQLException {
     Integer i = rs.getObject(columnName, Integer.class);
-    if(i == null) {
+    if (i == null) {
       return null;
     }
     return i.longValue();
+  }
+
+  public Game loadGame(Long gameId) {
+    String sql = "SELECT * FROM game WHERE id = ?";
+    return getJdbcTemplate().queryForObject(sql, new RowMapper<Game>() {
+
+      @Override
+      public Game mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return new Game.Builder().allChallengesCompletedText(rs.getString("game_ended_text"))
+            .noAssignmentsAvailableText(rs.getString("no_assignment_available_text")).build();
+      }
+
+    }, gameId);
   }
 }

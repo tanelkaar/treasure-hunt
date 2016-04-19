@@ -47,7 +47,7 @@ public class TreasureHuntServiceImpl implements TreasureHuntService, Initializin
     if (teamId == null) {
       teamId = treasureHuntDAO.createTeam(teamRegistration.getName(), gameId);
     }
-    return getTeamCurrentState(teamId);
+    return getTeamCurrentStateInternal(gameId, teamId);
   }
 
   private void checkGame(Long gameId) throws InputParameterValidationException {
@@ -56,8 +56,12 @@ public class TreasureHuntServiceImpl implements TreasureHuntService, Initializin
           new Messages().addError(getMessage("error.invalid_game_identifier", gameId))).build());
     }
   }
-  private TeamCurrentState getTeamCurrentState(Long teamId) {
-    return treasureHuntDAO.getTeamCurrentState(teamId);
+  private TeamCurrentState getTeamCurrentStateInternal(Long gameId, Long teamId) {
+    TeamCurrentState teamCurrentState = treasureHuntDAO.getTeamCurrentState(teamId);
+    if(teamCurrentState.getGameEnded()) {
+      teamCurrentState.addSuccess(treasureHuntDAO.loadGame(gameId).getAllChallengesCompletedText());
+    }
+    return teamCurrentState;
   }
 
   @Override
@@ -68,7 +72,7 @@ public class TreasureHuntServiceImpl implements TreasureHuntService, Initializin
     } catch (InputParameterValidationException e) {
       return e.getTeamCurrentState();
     }
-    return getTeamCurrentState(teamId);
+    return getTeamCurrentStateInternal(gameId, teamId);
   }
 
   private void checkTeam(Long gameId, Long teamId) throws InputParameterValidationException {
@@ -88,20 +92,20 @@ public class TreasureHuntServiceImpl implements TreasureHuntService, Initializin
     }
 
     if(treasureHuntDAO.hasCurrentAssignment(teamId)) {
-      TeamCurrentState currentState = getTeamCurrentState(teamId);
+      TeamCurrentState currentState = getTeamCurrentStateInternal(gameId, teamId);
       currentState.addError(getMessage("error.existing_assignment_in_progress"));
       return currentState;
     }
 
     List<Long> freeAssignmentIds = treasureHuntDAO.getAvailableAssignmentIds(gameId, teamId);
     if(freeAssignmentIds.isEmpty()) {
-      TeamCurrentState currentState = getTeamCurrentState(teamId);
+      TeamCurrentState currentState = getTeamCurrentStateInternal(gameId, teamId);
       currentState.addWarning(getMessage("warning.no_free_assignment_available"));
       return currentState;
     }
 
     boolean assigned = treasureHuntDAO.assignChallenge(teamId, freeAssignmentIds.get(0));
-    TeamCurrentState currentState = getTeamCurrentState(teamId);
+    TeamCurrentState currentState = getTeamCurrentStateInternal(gameId, teamId);
     if(!assigned) {
       currentState.addWarning(getMessage("warning.no_free_assignment_available"));
     }
@@ -120,13 +124,13 @@ public class TreasureHuntServiceImpl implements TreasureHuntService, Initializin
     }
 
     if(!treasureHuntDAO.hasCurrentAssignment(teamId)) {
-      TeamCurrentState currentState = getTeamCurrentState(teamId);
+      TeamCurrentState currentState = getTeamCurrentStateInternal(gameId, teamId);
       currentState.addError(getMessage("error.no_assignment_in_progress"));
       return currentState;
     }
 
     if(submitSolution == null || StringUtils.isEmpty(submitSolution.getSolution())) {
-      TeamCurrentState currentState = treasureHuntDAO.getTeamCurrentState(teamId);
+      TeamCurrentState currentState = getTeamCurrentStateInternal(gameId, teamId);
       currentState.addError(getMessage("error.no_solution_provided"));
       return currentState;
     }
@@ -136,11 +140,11 @@ public class TreasureHuntServiceImpl implements TreasureHuntService, Initializin
 
     if(assignment.getSolution().toUpperCase().equals(submitSolution.getSolution().toUpperCase())) {
       treasureHuntDAO.finishAssignment(assignment.getId());
-      TeamCurrentState currentState = treasureHuntDAO.getTeamCurrentState(teamId);
+      TeamCurrentState currentState = getTeamCurrentStateInternal(gameId, teamId);
       currentState.addSuccess(assignment.getCorrectText());
       return currentState;
     }
-    TeamCurrentState currentState = treasureHuntDAO.getTeamCurrentState(teamId);
+    TeamCurrentState currentState = getTeamCurrentStateInternal(gameId, teamId);
     currentState.addError(assignment.getWrongText());
     return currentState;
   }
