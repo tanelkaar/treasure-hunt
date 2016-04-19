@@ -64,6 +64,10 @@
     <div class="panel panel-default" ng-if="text">
         <div class="panel-body">{{text}}</div>
     </div>
+
+    <div class="alert alert-success" ng-if="messages.success" ng-repeat="m in messages.success">
+        {{m}}
+    </div>
 </div>
 
 <div ng-controller="submit-solution" ng-show="text">
@@ -93,7 +97,7 @@
         {{ss}}
     </div>
 
-    <div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-if="sMessages.success"
+    <div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-if="sMessages.success && !sGameEnded"
           style="margin-top:10px">
         <form name="next-assignment-form" method="">
             <input type="submit" class="btn btn-primary btn-lg center-block"
@@ -121,7 +125,7 @@
     </div>
 </div>
 
-<div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-show="!text"
+<div  ng-controller="get-new-assignment" ng-submit="getNewAssignment()" ng-show="!text && !aGameEnded"
       style="margin-top:10px">
     <form name="next-assignment-form" method="">
         <input type="submit" class="btn btn-primary btn-lg center-block"
@@ -175,6 +179,7 @@
             }
             $scope.total = data.challengesTotal;
             $scope.completed = data.challengesCompleted;
+            $scope.messages = data.messages;
         }).error(function (data, status) {
             $scope.aError=status + ": Andmete pärimine ebaõnnestus";
         });
@@ -194,6 +199,7 @@
 
             $http.post(url, json).success(function (data) {
                 $scope.sMessages = data.messages;
+                $scope.sGameEnded = data.gameEnded;
                 //if (data.messages.success) {
                 //   $window.location.reload();
                 //}
@@ -207,6 +213,7 @@
 
         $http.get(url).success(function (data) {
             $scope.text = data.currentassignment;
+            $scope.aGameEnded = data.gameEnded;
         }).error(function (data, status) {
             $scope.sError=status + ": Andmete pärimine ebaõnnestus";
         });
@@ -219,6 +226,7 @@
                 headers: {'Content-Type': 'application/json'}
             }).success(function (data) {
                 $scope.aMessages = data.messages;
+                $scope.gameEnded = data.gameEnded;
                 if (data.currentassignment) {
                     $window.location.reload();
                 }
