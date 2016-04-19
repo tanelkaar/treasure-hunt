@@ -14,10 +14,21 @@ public class TeamAssignment implements Serializable {
   private String completedIn;
   private Long tries;
 
+  @JsonFormat(shape=JsonFormat.Shape.OBJECT)
   public enum AssignmentStatus {
     CURRENT,
     COMPLETED,
-    WAITING
+    WAITING;
+
+    private String text;
+
+    public String getText() {
+      return text;
+    }
+
+    public void setText(String text) {
+      this.text = text;
+    }
   }
 
   public AssignmentStatus getStatus() {
@@ -56,6 +67,7 @@ public class TeamAssignment implements Serializable {
     if(startTime != null && endTime != null) {
       Long diff = (endTime.getTime() - startTime.getTime()) / 1000;
       completedIn = ((int)(diff / 60)) + "m " + (diff % 60) + "s";
+      status = AssignmentStatus.COMPLETED;
     }
   }
 

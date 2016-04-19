@@ -6,6 +6,7 @@ import com.nortal.treasurehunt.model.Assignment;
 import com.nortal.treasurehunt.model.rest.Messages;
 import com.nortal.treasurehunt.model.rest.SubmitSolution;
 import com.nortal.treasurehunt.model.rest.Team;
+import com.nortal.treasurehunt.model.rest.TeamAssignment;
 import com.nortal.treasurehunt.model.rest.TeamCurrentState;
 import com.nortal.treasurehunt.model.rest.TeamRegistration;
 import com.nortal.treasurehunt.service.TreasureHuntService;
@@ -161,5 +162,12 @@ public class TreasureHuntServiceImpl implements TreasureHuntService, Initializin
   @Override
   public void afterPropertiesSet() throws Exception {
     this.locale = StringUtils.parseLocaleString(defaultLocale);
+    initializeStatusEnum();
+  }
+
+  private void initializeStatusEnum() {
+    for(TeamAssignment.AssignmentStatus status : TeamAssignment.AssignmentStatus.values()) {
+      status.setText(getMessage("assignmentStatus." + status.name().toLowerCase()));
+    }
   }
 }
