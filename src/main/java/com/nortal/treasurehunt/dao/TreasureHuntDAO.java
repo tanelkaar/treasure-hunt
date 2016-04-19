@@ -2,7 +2,7 @@ package com.nortal.treasurehunt.dao;
 
 import com.nortal.treasurehunt.model.Assignment;
 import com.nortal.treasurehunt.model.Game;
-import com.nortal.treasurehunt.model.rest.Currentassignment;
+import com.nortal.treasurehunt.model.rest.CurrentAssignment;
 import com.nortal.treasurehunt.model.rest.Team;
 import com.nortal.treasurehunt.model.rest.TeamAssignment;
 import com.nortal.treasurehunt.model.rest.TeamCurrentState;
@@ -84,8 +84,8 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
           public TeamCurrentState mapRow(ResultSet rs, int rowNum)
               throws SQLException {
             String assignmentText = rs.getString("current_assignment_text");
-            Currentassignment assignment = assignmentText == null ? null
-                : new Currentassignment(assignmentText);
+            CurrentAssignment assignment = assignmentText == null ? null
+                : new CurrentAssignment(assignmentText);
 
             return new TeamCurrentState.Builder().id(rs.getLong("id"))
                 .challengesCompleted(rs.getLong("challenges_completed"))

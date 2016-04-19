@@ -46,7 +46,7 @@ public class TeamAssignment implements Serializable {
   public void setStartTime(Date startTime) {
     this.startTime = startTime;
     fillCompletedIn();
-    if(startTime != null && status == null) {
+    if(startTime != null && endTime == null) {
       status = AssignmentStatus.CURRENT;
     }
   }

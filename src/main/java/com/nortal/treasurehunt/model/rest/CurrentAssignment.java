@@ -2,9 +2,9 @@ package com.nortal.treasurehunt.model.rest;
 
 import java.io.Serializable;
 
-public class Currentassignment implements Serializable {
+public class CurrentAssignment implements Serializable {
   
-  public Currentassignment(String text) {
+  public CurrentAssignment(String text) {
     this.text = text;
   }
 

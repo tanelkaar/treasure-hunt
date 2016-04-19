@@ -38,6 +38,7 @@ public class Team {
     if(assignment.getStartTime() != null && assignment.getEndTime() == null) {
       waiting = false;
     }
+    finished = challengesTotal == challengesCompleted;
     return this;
   }
   public void setAssignments(List<TeamAssignment> assignments) {

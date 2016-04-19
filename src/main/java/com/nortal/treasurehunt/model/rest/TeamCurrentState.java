@@ -10,7 +10,7 @@ import java.util.List;
 public class TeamCurrentState implements Serializable {
   private Long id;
   private List<Link> links;
-  private Currentassignment currentassignment;
+  private CurrentAssignment currentassignment;
   private Long challengesCompleted;
   private Long challengesTotal;
   private boolean gameEnded;
@@ -48,11 +48,11 @@ public class TeamCurrentState implements Serializable {
     this.id = id;
   }
 
-  public Currentassignment getCurrentassignment() {
+  public CurrentAssignment getCurrentassignment() {
     return currentassignment;
   }
 
-  public void setCurrentassignment(Currentassignment currentassignment) {
+  public void setCurrentassignment(CurrentAssignment currentassignment) {
     this.currentassignment = currentassignment;
   }
 
@@ -102,7 +102,7 @@ public class TeamCurrentState implements Serializable {
   public static class Builder {
     private Long id;
     private List<Link> links;
-    private Currentassignment currentassignment;
+    private CurrentAssignment currentassignment;
     private Long challengesCompleted;
     private Long challengesTotal;
     private boolean gameEnded;
@@ -118,7 +118,7 @@ public class TeamCurrentState implements Serializable {
       return this;
     }
 
-    public Builder currentassignment(Currentassignment currentassignment) {
+    public Builder currentassignment(CurrentAssignment currentassignment) {
       this.currentassignment = currentassignment;
       return this;
     }
