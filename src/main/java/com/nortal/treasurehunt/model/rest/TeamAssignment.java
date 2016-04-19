@@ -7,20 +7,25 @@ import java.util.Date;
 public class TeamAssignment implements Serializable {
 
   private AssignmentStatus status = AssignmentStatus.WAITING;
-  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
   private Date startTime;
-  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
   private Date endTime;
   private String completedIn;
   private Long tries;
 
-  @JsonFormat(shape=JsonFormat.Shape.OBJECT)
+  @JsonFormat(shape = JsonFormat.Shape.OBJECT)
   public enum AssignmentStatus {
     CURRENT,
     COMPLETED,
     WAITING;
 
     private String text;
+    private String code;
+
+    private AssignmentStatus() {
+      code = name();
+    }
 
     public String getText() {
       return text;
@@ -28,6 +33,14 @@ public class TeamAssignment implements Serializable {
 
     public void setText(String text) {
       this.text = text;
+    }
+
+    public String getCode() {
+      return code;
+    }
+
+    public void setCode(String code) {
+      this.code = code;
     }
   }
 
@@ -46,7 +59,7 @@ public class TeamAssignment implements Serializable {
   public void setStartTime(Date startTime) {
     this.startTime = startTime;
     fillCompletedIn();
-    if(startTime != null && endTime == null) {
+    if (startTime != null && endTime == null) {
       status = AssignmentStatus.CURRENT;
     }
   }
@@ -58,15 +71,15 @@ public class TeamAssignment implements Serializable {
   public void setEndTime(Date endTime) {
     this.endTime = endTime;
     fillCompletedIn();
-    if(endTime != null) {
+    if (endTime != null) {
       status = AssignmentStatus.COMPLETED;
     }
   }
 
   private void fillCompletedIn() {
-    if(startTime != null && endTime != null) {
+    if (startTime != null && endTime != null) {
       Long diff = (endTime.getTime() - startTime.getTime()) / 1000;
-      completedIn = ((int)(diff / 60)) + "m " + (diff % 60) + "s";
+      completedIn = ((int) (diff / 60)) + "m " + (diff % 60) + "s";
       status = AssignmentStatus.COMPLETED;
     }
   }
@@ -85,5 +98,13 @@ public class TeamAssignment implements Serializable {
 
   public void setCompletedIn(String completedIn) {
     this.completedIn = completedIn;
+  }
+
+  public long getSecondsInGame() {
+    if (startTime == null) {
+      return 0;
+    }
+    return ((endTime == null ? System.currentTimeMillis() : endTime.getTime())
+    - startTime.getTime()) / 1000;
   }
 }

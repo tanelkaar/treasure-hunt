@@ -32,9 +32,9 @@
 
 <body style="margin: 20px" ng-app="treasure-hunt">
 
-<div>
+<!-- div>
     <h2 class="text-info">Töölaud: Aardemäng TÜK's</h2>
-</div>
+</div-->
 
 <div ng-controller="result-table">
     <div class="alert alert-danger" style="margin-top: 10px" ng-if="error">
@@ -43,12 +43,12 @@
 
     <table class="table table-hover">
         <tr ng-repeat="t in teams">
-            <th class="active"><p>{{t.name}}</p></th>
+            <th class="active"><p>{{t.name}}</p><p>{{t.timeInGame}}</p></th>
             <td ng-repeat="a in t.assignments">
-                <p ng-if="a.status==='CURRENT'" class="alert-info text-center">{{a.status}} <span
+                <p ng-if="a.status.code==='CURRENT'" class="alert-info text-center">{{a.status.text}} <span
                         class="glyphicon glyphicon-star-empty"></span></p>
-                <p ng-if="a.status==='WAITING'" class="alert-warning text-center">{{a.status}}</p>
-                <p ng-if="a.status==='COMPLETED'" class="alert-success text-center">{{a.status}}<br><span
+                <p ng-if="a.status.code==='WAITING'" class="alert-warning text-center">{{a.status.text}}</p>
+                <p ng-if="a.status.code==='COMPLETED'" class="alert-success text-center">{{a.status.text}}<br><span
                         class="glyphicon glyphicon-hourglass"></span>{{a.completedIn}}</p>
 
                 <p ng-if="a.startTime"><span class="glyphicon glyphicon-play"></span> {{a.startTime}}</p>
