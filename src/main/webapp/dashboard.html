@@ -3,7 +3,7 @@
 <head>
 
     <meta charset="utf-8">
-
+    <meta http-equiv="refresh" content="30">
     <!-- Mobile-first -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -51,8 +51,8 @@
                 <p ng-if="a.status.code==='COMPLETED'" class="alert-success text-center">{{a.status.text}}<br><span
                         class="glyphicon glyphicon-hourglass"></span>{{a.completedIn}}</p>
 
-                <p ng-if="a.startTime"><span class="glyphicon glyphicon-play"></span> {{a.startTime}}</p>
-                <p ng-if="a.endTime"><span class="glyphicon glyphicon-flag"></span> {{a.endTime}}</p>
+                <!-- p ng-if="a.startTime"><span class="glyphicon glyphicon-play"></span> {{a.startTime}}</p>
+                <p ng-if="a.endTime"><span class="glyphicon glyphicon-flag"></span> {{a.endTime}}</p-->
                 <p ng-if="a.tries"><span class="glyphicon glyphicon-refresh"></span> {{a.tries}}</p>
             </td>
         </tr>
