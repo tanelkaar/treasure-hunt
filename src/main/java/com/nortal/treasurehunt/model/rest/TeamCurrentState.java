@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class TeamCurrentState implements Serializable {
   private Long id;
+  private String name;
   private List<Link> links;
   private CurrentAssignment currentassignment;
   private Long challengesCompleted;
@@ -101,6 +102,7 @@ public class TeamCurrentState implements Serializable {
 
   public static class Builder {
     private Long id;
+    private String name;
     private List<Link> links;
     private CurrentAssignment currentassignment;
     private Long challengesCompleted;
@@ -113,6 +115,10 @@ public class TeamCurrentState implements Serializable {
       return this;
     }
 
+    public Builder name(String name) {
+      this.name = name;
+      return this;
+    }
     public Builder links(List<Link> links) {
       this.links = links;
       return this;
@@ -150,6 +156,7 @@ public class TeamCurrentState implements Serializable {
 
   private TeamCurrentState(Builder builder) {
     this.id = builder.id;
+    this.name = builder.name;
     this.links = builder.links;
     this.currentassignment = builder.currentassignment;
     this.challengesCompleted = builder.challengesCompleted;
@@ -157,5 +164,13 @@ public class TeamCurrentState implements Serializable {
     this.gameEnded = builder.gameEnded;
     this.messages = builder.messages;
     this.fillGameEnded();
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 }

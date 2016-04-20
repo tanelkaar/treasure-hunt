@@ -70,7 +70,7 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
 
   public TeamCurrentState getTeamCurrentState(Long teamId) {
     String sql =
-        "SELECT t.id, c.TEXT AS current_assignment_text, "
+        "SELECT t.id, t.name, c.TEXT AS current_assignment_text, "
             + "(SELECT count(*) FROM ASSIGNMENT am WHERE am.TEAM_ID = t.id AND am.END_TIME IS NOT null) AS challenges_completed, "
             + "(SELECT count(*) FROM challenge ch WHERE ch.game_id = t.game_id) AS challenges_total "
             + "FROM team t "
@@ -88,6 +88,7 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
                 : new CurrentAssignment(assignmentText);
 
             return new TeamCurrentState.Builder().id(rs.getLong("id"))
+                .name(rs.getString("name"))
                 .challengesCompleted(rs.getLong("challenges_completed"))
                 .challengesTotal(rs.getLong("challenges_total"))
                 .currentassignment(assignment).build();
@@ -210,8 +211,10 @@ public class TreasureHuntDAO extends JdbcDaoSupport {
 
       @Override
       public Game mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new Game.Builder().allChallengesCompletedText(rs.getString("game_ended_text"))
-            .noAssignmentsAvailableText(rs.getString("no_assignment_available_text")).build();
+        return new Game.Builder()
+            .allChallengesCompletedText(rs.getString("game_ended_text"))
+            .noAssignmentsAvailableText(
+                rs.getString("no_assignment_available_text")).build();
       }
 
     }, gameId);
