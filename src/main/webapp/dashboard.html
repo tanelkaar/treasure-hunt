@@ -37,19 +37,26 @@
 </div-->
 
 <div ng-controller="result-table">
+
     <div class="alert alert-danger" style="margin-top: 10px" ng-if="error">
         <p>{{error}}</p>
     </div>
 
     <table class="table table-hover">
         <tr ng-repeat="t in teams">
-            <th class="active"><p>{{t.name}}</p><p>{{t.timeInGame}}</p></th>
+            <th ng-if="t.finished" class="active success"><h4>{{t.name}} <span
+                    class="glyphicon glyphicon-sunglasses"></span></h4>{{t.timeInGame}}
+            </th>
+            <th ng-if="!t.finished && t.waiting" class="active danger"><h4>{{t.name}} <span
+                    class="glyphicon glyphicon-hourglass"></span></h4>{{t.timeInGame}}
+            </th>
+            <th ng-if="!t.finished && !t.waiting" class="active"><h4>{{t.name}}</h4>{{t.timeInGame}}</th>
             <td ng-repeat="a in t.assignments">
                 <p ng-if="a.status.code==='CURRENT'" class="alert-info text-center">{{a.status.text}} <span
                         class="glyphicon glyphicon-star-empty"></span></p>
                 <p ng-if="a.status.code==='WAITING'" class="alert-warning text-center">{{a.status.text}}</p>
                 <p ng-if="a.status.code==='COMPLETED'" class="alert-success text-center">{{a.status.text}}<br><span
-                        class="glyphicon glyphicon-hourglass"></span>{{a.completedIn}}</p>
+                        class="glyphicon glyphicon-time"></span> {{a.completedIn}}</p>
 
                 <!-- p ng-if="a.startTime"><span class="glyphicon glyphicon-play"></span> {{a.startTime}}</p>
                 <p ng-if="a.endTime"><span class="glyphicon glyphicon-flag"></span> {{a.endTime}}</p-->
@@ -57,9 +64,35 @@
             </td>
         </tr>
     </table>
+
+    <div class="progress">
+        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{completedChallenges}}"
+             aria-valuemin="0"
+             aria-valuemax="{{totalChallenges}}" style="width:{{100 / (totalChallenges/completedChallenges) | number:0}}%">
+            Läbitud {{completedChallenges}}/{{totalChallenges}}
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading"><span class="text-muted">Legend</span></div>
+    <div class="panel-body">
+        <p><span class="glyphicon glyphicon-sunglasses"></span> - meeskkond lõpetas mängu</p>
+        <p><span class="glyphicon glyphicon-hourglass"></span> - meeskkond ootab ülesannet</p>
+        <p><span class="glyphicon glyphicon-time"></span> - ülesande lahendamise aeg</p>
+        <!--<p><span class="glyphicon glyphicon-play"></span> - ülesande alustamise hetk</p>
+        <p><span class="glyphicon glyphicon-flag"></span> - ülesande lõpetamise hetk</p>-->
+        <p><span class="glyphicon glyphicon-refresh"></span> - katsetuste arv</p>
+    </div>
 </div>
 
 <script type="text/javascript" charset="UTF-8">
+
+    function autoRefresh() {
+        window.location = window.location.href;
+    }
+
+    setInterval('autoRefresh()', 30000);
 
     function getParameter(theParameter) {
         var params = window.location.search.substr(1).split('&');
@@ -80,6 +113,19 @@
     app.controller("result-table", function ($scope, $http) {
         $http.get(url).success(function (data) {
             $scope.teams = data;
+
+            var teamsNumber = data.length;
+            var challengeNumber = data[0].assignments.length;
+
+            $scope.totalChallenges = teamsNumber * challengeNumber;
+            $scope.completedChallenges = 0;
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < data[i].assignments.length; j++) {
+                    if (data[i].assignments[j].endTime) {
+                        $scope.completedChallenges++;
+                    }
+                }
+            }
         }).error(function (data, status) {
             $scope.error = status + ": Andmete pärimine ebaõnnestus";
         });
