@@ -3,7 +3,6 @@
 <head>
 
     <meta charset="utf-8">
-    <meta http-equiv="refresh" content="30">
     <!-- Mobile-first -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -68,7 +67,8 @@
     <div class="progress">
         <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{completedChallenges}}"
              aria-valuemin="0"
-             aria-valuemax="{{totalChallenges}}" style="width:{{100 / (totalChallenges/completedChallenges) | number:0}}%">
+             aria-valuemax="{{totalChallenges}}"
+             style="width:{{100 / (totalChallenges/completedChallenges) | number:0}}%">
             Läbitud {{completedChallenges}}/{{totalChallenges}}
         </div>
     </div>
@@ -88,12 +88,6 @@
 
 <script type="text/javascript" charset="UTF-8">
 
-    function autoRefresh() {
-        window.location = window.location.href;
-    }
-
-    setInterval('autoRefresh()', 30000);
-
     function getParameter(theParameter) {
         var params = window.location.search.substr(1).split('&');
 
@@ -110,7 +104,8 @@
     var gameId = getParameter("gameId");
     var url = "/api/games/" + gameId;
 
-    app.controller("result-table", function ($scope, $http) {
+    app.controller("result-table", function ($scope, $http, $interval) {
+
         $http.get(url).success(function (data) {
             $scope.teams = data;
 
@@ -129,7 +124,31 @@
         }).error(function (data, status) {
             $scope.error = status + ": Andmete pärimine ebaõnnestus";
         });
+
+        $interval(function () {
+
+            $http.get(url).success(function (data) {
+                $scope.teams = data;
+
+                var teamsNumber = data.length;
+                var challengeNumber = data[0].assignments.length;
+
+                $scope.totalChallenges = teamsNumber * challengeNumber;
+                $scope.completedChallenges = 0;
+                for (var i = 0; i < data.length; i++) {
+                    for (var j = 0; j < data[i].assignments.length; j++) {
+                        if (data[i].assignments[j].endTime) {
+                            $scope.completedChallenges++;
+                        }
+                    }
+                }
+            }).error(function (data, status) {
+                $scope.error = status + ": Andmete pärimine ebaõnnestus";
+            });
+
+        }, 30000);
     });
+
 
 </script>
 

@@ -65,7 +65,7 @@
             var json = JSON.stringify({name: teamTitle});
 
             $http.post(url, json).success(function (data) {
-                $window.location.href = "/assignment.html?gameId=" + gameId + "&teamId=" + data.id + "&teamTitle=" + teamTitle;
+                $window.location.href = "/assignment.html?gameId=" + gameId + "&teamId=" + data.id;
             }).error(function (data, status) {
                 $scope.error = status + ": Andmete saatmine ebaõnnestus";
             });
